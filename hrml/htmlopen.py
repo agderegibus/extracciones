@@ -154,6 +154,10 @@ while(True):
             color = "#209c05" 
         elif value == 4:
             color = "#a8329b" 
+        elif value == 5:
+            color = "#de3c31"
+        elif value == 6:
+            color = "#74e667"
 
         return ['background-color: {}'.format(color) for r in row]
 
@@ -310,14 +314,18 @@ while(True):
         DATAFINAL["PRIMER_ANALISIS"] = DATAFINAL["Saldo POSTA"] + DATAFINAL["Monto"] +DATAFINAL["Ingresos Verificados"]
     elif ventana == "2":
         DATAFINAL["PRIMER_ANALISIS"] = DATAFINAL["Saldo POSTA"] + DATAFINAL["MargenDelDia"] + DATAFINAL["Monto"] +DATAFINAL["Ingresos Verificados"]
-
+    propiass = data_cuentas[data_cuentas.TipoCuentaCompensacionDescripcion == "Propia"]
+    propiass = list(propiass.CuentaCompensacionCodigo)
     tipodeaprobacion = []
     for i in range(len(DATAFINAL)):
         primeranalisis = int(DATAFINAL["PRIMER_ANALISIS"][i])
         SE = int(DATAFINAL["Monto"][i])
+        lopsito = int(DATAFINAL["LopVerificado"][i])
         saldoalyc =  int(DATAFINAL["Saldo de la propia"][i])
         noverificado = int(DATAFINAL["NoVerificado"][i])
         activo = DATAFINAL["ActivoDescripcion"][i]
+        cimcod = str(DATAFINAL.CimCodigo[i])
+
         FCI = "FCI"
 
         if primeranalisis >= 0:
@@ -334,8 +342,16 @@ while(True):
         if ventana == str(2):
             if FCI in activo:
                 aprobacion = 4
+
+            if primeranalisis < 0:
+                if lopsito + primeranalisis > 0:
+                    aprobacion = 6
         elif ventana == str(1):
             pass
+
+        if aprobacion == 3 and cimcod in(propiass):
+            aprobacion = 5
+
         tipodeaprobacion.append(aprobacion)
 
     DATAFINAL["OUT"] = tipodeaprobacion
