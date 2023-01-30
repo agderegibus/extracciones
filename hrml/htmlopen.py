@@ -325,6 +325,7 @@ while(True):
         noverificado = int(DATAFINAL["NoVerificado"][i])
         activo = DATAFINAL["ActivoDescripcion"][i]
         cimcod = str(DATAFINAL.CimCodigo[i])
+        mgg = int(DATAFINAL["MargenDelDia"][i])
 
         FCI = "FCI"
 
@@ -344,8 +345,11 @@ while(True):
                 aprobacion = 4
 
             if primeranalisis < 0:
-                if lopsito + primeranalisis > 0:
-                    aprobacion = 6
+                if primeranalisis - mgg > 0:
+                    if lopsito > 0:
+                        aprobacion = 6
+                    else:
+                        aprobacion = 0
         elif ventana == str(1):
             pass
 
@@ -466,4 +470,3 @@ while(True):
 
     time.sleep(refreshrate)
     driver.refresh()
-    time.sleep(5)
