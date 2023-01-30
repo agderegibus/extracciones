@@ -17,7 +17,7 @@ import time
 refreshrate = input("Ingrese el refresh rate en segundos: ")
 refreshrate = int(refreshrate)
 driver = webdriver.Chrome()
-driver.get("file:///C:/Users/aggonzalez/Desktop/CODE/SE/hrml/se.html")
+driver.get("file:///C:/Users/aggonzalez/Desktop/CODE/EXTRACCIONES\hrml\se.html")
 
 while(True):
     def format_float(value):
@@ -185,6 +185,12 @@ while(True):
     DATAFINAL["CuentaPropiaDelMC"] = cuentapropia
     DATAFINAL["ALyC"] = nombreMC
 
+
+    lop = []
+    lopverificado = []
+    lopnoverificado = [] 
+    lopmargentotal = []
+
     listasaldospropios = []
     saldorealdelacuenta = []
     neteodescrip = []
@@ -238,10 +244,31 @@ while(True):
 
             calditos = saldoprevia["AP5"].sum()
             saldodelapropia = calditos
+
+
+            urllop = f"https://riskzone.anywhereportfolio.com.ar:9099/api/lopdrp/getlopalycdrill?MCId={ALYCID}&CurrentPage=1"
+            tokenobj = {'key': 'value'}
+            LOP = requests.get(urllop, json = tokenobj)
+            data = LOP.json()
+            data = (data["mcLopInfoList"])
+            df = pd.DataFrame(data)
+
+            LOPNOVERIFICADO = df.LopNoVerificado[0]
+            LOPVERIFICADO = df.LopVerificado.values[0]
+            LOPMARGENTOTAL = df.LopMargenTotal[0]
+            LOP = df.Lop[0]
+            df.LopEstaNotificado[0]
+
+
+
         except:
             saldodelapropia = 666
 
         listasaldospropios.append(saldodelapropia)
+        lop.append(LOP)
+        lopmargentotal.append(LOPMARGENTOTAL)
+        lopverificado.append(LOPVERIFICADO)
+        lopnoverificado.append(LOPNOVERIFICADO)
 
         tokenobj = {"key":"value"}
         ENDPOINT = f"https://riskzone.anywhereportfolio.com.ar:9099/api/saldosconsolidados?MCId={ALYCID}&CelID={CIM}&NeteoID={NETEO}&FinalidadID={FINALIDAD}"
@@ -274,6 +301,10 @@ while(True):
     DATAFINAL["Margen Requerido Del Dia"] = margendeldia
     DATAFINAL["NoVerificado2"] = ingresonoverif
     DATAFINAL["Cantidad"]=cantidad
+    DATAFINAL["EstadoLOP"] = lop
+    DATAFINAL["LopNoVerificado"] = lopnoverificado
+    DATAFINAL["LopVerificado"] = lopverificado
+    DATAFINAL["LopMargenTotal"] = lopmargentotal
 
     if ventana == "1":
         DATAFINAL["PRIMER_ANALISIS"] = DATAFINAL["Saldo POSTA"] + DATAFINAL["Monto"] +DATAFINAL["Ingresos Verificados"]
@@ -325,7 +356,7 @@ while(True):
     DATAFINAL["FinalidadDescripcion"] = FINALIDAD
 
     DATA2 =DATAFINAL
-    DATAFINAL = DATAFINAL[["ExtraccionHora","MC_Cod","ALyC","CimCodigo", "NeteoCodigo","Neteo Descripcion", "ActivoDescripcion","ActivoID","FinalidadID","FinalidadDescripcion","Cantidad","Monto", "Saldo POSTA","Ingresos Verificados", "NoVerificado", "MargenDelDia","PRIMER_ANALISIS","CuentaPropiaDelMC", "Saldo de la propia","OUT", "MiembroCompensadorID","CimID","CuentaNeteoID" ]]
+    DATAFINAL = DATAFINAL[["ExtraccionHora","MC_Cod","ALyC","CimCodigo", "NeteoCodigo","Neteo Descripcion", "ActivoDescripcion","ActivoID","FinalidadID","FinalidadDescripcion","Cantidad","Monto", "Saldo POSTA","Ingresos Verificados", "NoVerificado", "MargenDelDia","PRIMER_ANALISIS","CuentaPropiaDelMC", "Saldo de la propia","OUT", "EstadoLOP","LopNoVerificado","LopVerificado","LopMargenTotal", "MiembroCompensadorID","CimID","CuentaNeteoID" ]]
     DATAFINAL = DATAFINAL.rename(columns={"ExtraccionHora":"Hora","MC_Cod":"MC","CimCodigo": "CIM", "NeteoCodigo": "Cuenta","ActivoDescripcion":"Activo","Saldo POSTA":"Saldo Inicial","NoVerificado":"Ingreso No Verificado","MargenDelDia":"Margenes","PRIMER_ANALISIS":"Saldo Consolidado Final","CuentaPropiaDelMC":"Propia MC", "Saldo de la propia":"Saldo MC"})
 
 
@@ -339,6 +370,9 @@ while(True):
     DATAFINAL['Saldo Consolidado Final'] = DATAFINAL['Saldo Consolidado Final'].astype('int64').map('{:,}'.format)
     DATAFINAL['Saldo MC'] = DATAFINAL['Saldo MC'].astype('int64').map('{:,}'.format)
     DATAFINAL['Cantidad'] = DATAFINAL['Cantidad'].astype('int64').map('{:,}'.format)
+    DATAFINAL['LopNoVerificado'] = DATAFINAL["LopNoVerificado"].astype('int64').map('{:,}'.format)
+    DATAFINAL['LopVerificado'] = DATAFINAL["LopVerificado"].astype('int64').map('{:,}'.format)
+    DATAFINAL["LopMargenTotal"] = DATAFINAL["LopMargenTotal"].astype('int64').map('{:,}'.format)
 
     now = str(datetime.now())
     filename = ("Extracciones-"+now[0:10]+".html")
@@ -351,7 +385,7 @@ while(True):
 
 
 
-    datu = DATAFINAL[["Hora","ALyC","CIM","Cuenta","Activo","FinalidadID","Cantidad","Monto",'Ingresos Verificados', 'Ingreso No Verificado',"Saldo Inicial","Margenes","Saldo Consolidado Final",'Propia MC',"Saldo MC","OUT"]]
+    datu = DATAFINAL[["Hora","ALyC","CIM","Cuenta","Activo","FinalidadID","Cantidad","Monto",'Ingresos Verificados', 'Ingreso No Verificado',"Saldo Inicial","Margenes","Saldo Consolidado Final",'Propia MC',"Saldo MC","EstadoLOP","LopNoVerificado","LopVerificado","LopMargenTotal","OUT"]]
     #print(DATAFINAL.columns)
 
 
@@ -359,7 +393,7 @@ while(True):
     #dfi.export(df_styled, filename,max_rows=-1)
     print("SAVE HTML ACA:  ")
     print(df_styled)
-    df_styled.to_html(r"C:\Users\aggonzalez\Desktop\CODE\SE\hrml\se.html")
+    df_styled.to_html(r"C:\Users\aggonzalez\Desktop\CODE\EXTRACCIONES\hrml\se.html")
 
     print("Listo")
 
