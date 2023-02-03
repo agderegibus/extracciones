@@ -147,17 +147,17 @@ while(True):
         if value == 0:
             color = '#FF0000' 
         elif value == 1:
-            color = '#85e62c' 
+            color = '#4ad948' 
         elif value == 2:
             color = '#ebff0a' 
         elif value == 3:
             color = "#209c05" 
         elif value == 4:
-            color = "#a8329b" 
+            color = "#5c4c9e" 
         elif value == 5:
-            color = "#de3c31"
+            color = "#a68481"
         elif value == 6:
-            color = "#74e667"
+            color = "#5c9450"
 
         return ['background-color: {}'.format(color) for r in row]
 
@@ -349,7 +349,12 @@ while(True):
                     if lopsito > 0:
                         aprobacion = 6
                     else:
-                        aprobacion = 0
+                        if primeranalisis + noverificado >= 0:
+                            aprobacion = 2
+                        else:
+                            aprobacion = 0
+            if FCI in activo:
+                aprobacion = 4
         elif ventana == str(1):
             pass
 
